@@ -1,2 +1,2 @@
 #!/bin/bash
-grep -q SCHOOL > /dev/null 2>&1 && echo "School data file" || echo "Other file"
+0 string SCHOOL \0
