@@ -1,0 +1,7 @@
+Host *
+    IdentityFile ~/.ssh/id_rsa
+
+Host 54.157.135.103
+    User ubuntu
+    IdentityFile ~/.ssh/school
+    GSSAPIAuthentication yes
