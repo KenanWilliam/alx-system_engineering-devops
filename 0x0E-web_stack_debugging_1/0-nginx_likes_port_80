@@ -1,16 +1,30 @@
 #!/usr/bin/env bash
 # This script ensures Nginx is running and configured to listen on port 80
-
 if ! systemctl is-active --quiet nginx; then
-    systemctl start nginx
+    echo "Nginx is not running. Starting Nginx..."
+    if ! systemctl start nginx; then
+        echo "Failed to start Nginx. Check logs for details."
+        exit 1
+    fi
 fi
 
 if ! grep -q "listen 80;" /etc/nginx/sites-enabled/default; then
-    ed /etc/nginx/sites-enabled/default << EOF
+    echo "Updating Nginx configuration to listen on port 80..."
+    if ! ed /etc/nginx/sites-enabled/default << EOF >/dev/null 2>&1
 /listen \[::\]:80;/
 s//listen 80;/
 w
 q
 EOF
-    systemctl restart nginx
+    then
+        echo "Error modifying Nginx configuration. Check logs for details."
+        exit 1
+    fi
+
+    if ! systemctl restart nginx; then
+        echo "Failed to restart Nginx. Check logs for details."
+        exit 1
+    fi
 fi
+
+echo "Nginx configuration updated (if necessary)."
