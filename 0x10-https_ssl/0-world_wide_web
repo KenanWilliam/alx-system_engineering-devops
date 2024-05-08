@@ -1,37 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#Configure your domain zone so that the subdomain www and display information about subdomains
 
-# Function to get and print DNS record information
-get_dns_info() {
-    local domain=$1
-    local subdomain=$2
-    local full_domain="${subdomain}.${domain}"
-    local result=$(dig $full_domain | grep -A1 'ANSWER SECTION:' | tail -1)
-
-    if [[ -n "$result" ]]; then
-        local ip=$(echo $result | awk '{print $NF}')
-        local record_type=$(echo $result | awk '{print $4}')
-        echo "The subdomain $subdomain is a $record_type record and points to $ip"
-    else
-        echo "No DNS record found for $full_domain"
-    fi
-}
-
-# Main script logic
-domain=$1
-subdomain=$2
-
-if [[ -n "$domain" ]]; then
-    if [[ -n "$subdomain" ]]; then
-        get_dns_info $domain $subdomain
-    else
-        # Display info for predefined subdomains
-        get_dns_info $domain "www"
-        get_dns_info $domain "lb-01"
-        get_dns_info $domain "web-01"
-        get_dns_info $domain "web-02"
-    fi
-else
-    echo "Domain name is required"
+if [ "$#" = 1 ]
+then
+    subdomains=("www" "lb-01" "web-01" "web-02")
+    for sub_domain in "${subdomains[@]}"
+    do
+	record_type=$(dig $sub_domain.$1 | grep -A1 'ANSWER SECTION' | tail -1 | awk '{print $4}')
+        destination=$(dig $sub_domain.$1 | grep -A1 'ANSWER SECTION' | tail -1 | awk '{print $5}')
+	echo "The subdomain $sub_domain is a $record_type record and points to $destination"
+    done
+elif [ "$#" = 2 ]
+then
+    record_type=$(dig $2.$1 | grep -A1 'ANSWER SECTION' | tail -1 | awk '{print $4}')
+    destination=$(dig $2.$1 | grep -A1 'ANSWER SECTION' | tail -1 | awk '{print $5}')
+    echo "The subdomain $2 is a $record_type record and points to $destination"
 fi
-
 
